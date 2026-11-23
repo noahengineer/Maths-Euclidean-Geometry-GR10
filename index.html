@@ -415,7 +415,7 @@ const CARDS = [
   {t:"Â + B̂ + Ĉ = 180°", g:"Triangle Properties", img:"intang", p:WHY,
     a:["int ∠s of △","int angles of triangle","int ∠s of a triangle","sum of ∠s in △","interior angles of a triangle"]},
   {t:"Ĉ₂ = Â + B̂", g:"Triangle Properties", img:"extang", p:WHY,
-    a:["ext ∠ of △","ext angle of triangle","ext ∠ of a triangle","exterior angle of a triangle"],
+    a:["ext ∠ of △","ext ∠ = sum of opp int ∠s","ext ∠ = sum of int opp ∠s","ext ∠ of △ = sum of int opp ∠s","ext ∠ of △ = sum of opp int ∠s","exterior angle of a triangle"],
     note:"The exterior angle of a triangle is equal to the sum of the interior opposite angles."},
   // Congruency (name only)
   {t:"Which congruency condition? (1/4)", g:"Congruency", img:"sss", p:COND, a:["SSS"],
@@ -454,22 +454,36 @@ document.body.style.backgroundSize="28px 28px,28px 28px,auto,auto";
 })();
 
 const SOFT = new Set(["a","an","the"]);
-const norm = w => w.toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9']/g,"").replace(/'s$/,"s");
-const words = s => s.split(/\s+/).map(w=>({raw:w,n:norm(w)})).filter(w=>w.n);
+// maths-aware matching: symbols become words (∠/< angle, △ triangle, ∥/|| parallel, = equal), short forms expand,
+// plurals fold, and a one-letter typo in a word of 4+ letters still counts
+const SYN={ext:"exterior",int:"interior",opp:"opposite",corresp:"corresponding",corr:"corresponding",alt:"alternate",adj:"adjacent",
+  supp:"supplementary",suppl:"supplementary",vert:"vertical",vertically:"vertical",str:"straight",equals:"equal",eq:"equal",around:"round",tri:"triangle"};
+function subs(raw){
+  const x=raw.toLowerCase().replace(/[’']/g,"").replace(/\|\|\||\/\/\//g," similar ").replace(/∥|\|\|/g," parallel ")
+    .replace(/∠s|<s\b/g," angles ").replace(/[∠<]/g," angle ").replace(/△/g," triangle ").replace(/≡/g," congruent ").replace(/=/g," equal ");
+  return x.split(/[^a-z0-9]+/).filter(Boolean).map(w=>{w=SYN[w]||w; if(w.length>3&&w.endsWith("s")&&!w.endsWith("ss"))w=w.slice(0,-1); return SYN[w]||w});
+}
+function lev1(a,b){ if(Math.abs(a.length-b.length)>1)return false; let i=0,j=0,e=0;
+  while(i<a.length&&j<b.length){ if(a[i]===b[j]){i++;j++;continue} if(++e>1)return false;
+    if(a.length>b.length)i++; else if(b.length>a.length)j++; else {i++;j++} }
+  return e+(a.length-i)+(b.length-j)<=1; }
+const same=(a,b)=>a===b||(a.length>=4&&b.length>=4&&!/\d/.test(a+b)&&lev1(a,b));
+function toks(s){return s.split(/\s+/).filter(Boolean).map(raw=>{const ss=subs(raw).filter(w=>!SOFT.has(w));return {raw,ss,n:ss.length?"x":"a"}})}
 
-// LCS over significant words -> which answer words matched, which typed words matched
+// LCS over significant sub-words -> which answer words matched, which typed words matched
 function compare(answer, typed){
-  const A = words(answer), T = words(typed);
-  const ai = A.map((w,i)=>i).filter(i=>!SOFT.has(A[i].n));
-  const ti = T.map((w,i)=>i).filter(i=>!SOFT.has(T[i].n));
-  const n=ai.length, m=ti.length, dp=[...Array(n+1)].map(()=>new Array(m+1).fill(0));
+  const A = toks(answer), T = toks(typed);
+  const fa=[], ft=[]; A.forEach((w,i)=>w.ss.forEach(s=>fa.push([s,i]))); T.forEach((w,i)=>w.ss.forEach(s=>ft.push([s,i])));
+  const n=fa.length, m=ft.length, dp=[...Array(n+1)].map(()=>new Array(m+1).fill(0));
   for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)
-    dp[i][j] = A[ai[i]].n===T[ti[j]].n ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j],dp[i][j+1]);
-  const hitA=new Set(), hitT=new Set(); let i=0,j=0;
+    dp[i][j] = same(fa[i][0],ft[j][0]) ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j],dp[i][j+1]);
+  const cA=new Map(), cT=new Map(); let i=0,j=0;
   while(i<n&&j<m){
-    if(A[ai[i]].n===T[ti[j]].n){hitA.add(ai[i]);hitT.add(ti[j]);i++;j++}
+    if(same(fa[i][0],ft[j][0])){cA.set(fa[i][1],(cA.get(fa[i][1])||0)+1);cT.set(ft[j][1],(cT.get(ft[j][1])||0)+1);i++;j++}
     else if(dp[i+1][j]>=dp[i][j+1])i++; else j++;
   }
+  const hitA=new Set([...cA].filter(([k,c])=>c===A[k].ss.length).map(([k])=>k));
+  const hitT=new Set([...cT].filter(([k,c])=>c===T[k].ss.length).map(([k])=>k));
   const lcs=dp[0][0];
   const recall = n? lcs/n : 0, precision = m? lcs/m : 0;
   const score = Math.round(100 * (0.85*recall + 0.15*precision));
