@@ -288,14 +288,14 @@ const IMG = {};
       tx(pt(A,180,10),"A")+tx(pt(Cc,0,10),"C")+tx(pt(D,112,14),"D")+tx(pt(E,295,14),"E")+tx(pt(B,78,58),"B"))})();
 
   // ---- parallel lines (E on AB, F on CD) ----
-  function par(mode){
+  function par(mode,hl){
     const E=[215,72],F=[175,182],A=[30,72],B=[370,72],Cc=[30,182],D=[370,182];
     let s=ln(A,B)+ln(Cc,D)+ln(pt(F,250,48),pt(E,70,52));
     if(mode!=="conv") s+=chev(A,B)+chev(Cc,D);
     const reg={1:[70,180],2:[0,70],3:[250,360],4:[180,250]};
-    const cols={corr:{E:{1:"a",2:"b",3:"c",4:"d"},F:{1:"a",2:"b",3:"c",4:"d"}},
+    const colsM={corr:{E:{1:"a",2:"b",3:"c",4:"d"},F:{1:"a",2:"b",3:"c",4:"d"}},
                 alt:{E:{4:"a",3:"b"},F:{2:"a",1:"b"}},
-                coint:{E:{4:"a",3:"b"},F:{1:"a",2:"b"}}, conv:{E:{},F:{}}}[mode];
+                coint:{E:{4:"a",3:"b"},F:{1:"a",2:"b"}}, conv:{E:{},F:{}}}[mode], cols=hl||colsM;
     for(const [V,nm] of [[E,"E"],[F,"F"]]) for(const k of [1,2,3,4]){
       const [a1,a2]=reg[k], c=cols[nm][k];
       s+= c? arc(V,a1,a2,{c:C[c],t:String(k),r:18,lr:30}) : num(V,(a1+a2)/2,String(k));
@@ -305,6 +305,7 @@ const IMG = {};
     return svg(400,250,s);
   }
   IMG.corr=par("corr"); IMG.alt=par("alt"); IMG.coint=par("coint"); IMG.conv=par("conv");
+  IMG.convCorr=par("conv",{E:{1:"a"},F:{1:"a"}}); IMG.convAlt=par("conv",{E:{4:"a"},F:{2:"a"}}); IMG.convCoint=par("conv",{E:{4:"a"},F:{1:"b"}});
 
   // ---- triangle types ----
   IMG.acute=(()=>{const A=[100,222],B=[300,222],Cc=triAB(A,B,55,60);
@@ -388,11 +389,11 @@ const CARDS = [
     a:[...PAR("alt ∠s"),...PAR("alt angles"),...PAR("alternate angles")]},
   {t:"Ê₄ + F̂₁ = 180° and Ê₃ + F̂₂ = 180°", g:"Parallel Lines", img:"coint", p:WHY,
     a:[...PAR("co-int ∠s"),...PAR("co-int angles"),...PAR("co-interior angles")]},
-  {t:"Ê₁ = F̂₁, so AB ∥ CD", g:"Parallel Lines", img:"conv", p:"No parallel marks. Why are the lines parallel?",
+  {t:"Ê₁ = F̂₁, so AB ∥ CD", g:"Parallel Lines", img:"convCorr", p:"No parallel marks. Why are the lines parallel?",
     a:["corresp ∠s =","corresp angles =","corresponding angles equal"]},
-  {t:"Ê₄ = F̂₂, so AB ∥ CD", g:"Parallel Lines", img:"conv", p:"No parallel marks. Why are the lines parallel?",
+  {t:"Ê₄ = F̂₂, so AB ∥ CD", g:"Parallel Lines", img:"convAlt", p:"No parallel marks. Why are the lines parallel?",
     a:["alt ∠s =","alt angles =","alternate angles equal"]},
-  {t:"Ê₄ + F̂₁ = 180°, so AB ∥ CD", g:"Parallel Lines", img:"conv", p:"No parallel marks. Why are the lines parallel?",
+  {t:"Ê₄ + F̂₁ = 180°, so AB ∥ CD", g:"Parallel Lines", img:"convCoint", p:"No parallel marks. Why are the lines parallel?",
     a:["co-int ∠s supp","co-int angles supp","co-interior angles supplementary"]},
   // Triangle types (name only; property shown on the back)
   {t:"Name this triangle (1/6)", g:"Triangle Types", img:"acute", p:NAME, a:["Acute-angled triangle","acute angled triangle","acute triangle","acute"],
