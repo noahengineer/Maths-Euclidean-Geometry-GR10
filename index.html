@@ -459,7 +459,7 @@ const SOFT = new Set(["a","an","the"]);
 const SYN={ext:"exterior",int:"interior",opp:"opposite",corresp:"corresponding",corr:"corresponding",alt:"alternate",adj:"adjacent",
   supp:"supplementary",suppl:"supplementary",vert:"vertical",vertically:"vertical",str:"straight",equals:"equal",eq:"equal",around:"round",tri:"triangle"};
 function subs(raw){
-  const x=raw.toLowerCase().replace(/[’']/g,"").replace(/\|\|\||\/\/\//g," similar ").replace(/∥|\|\|/g," parallel ")
+  const x=raw.replace(/\b[Tt]ri(?=[A-Z])/g," triangle ").replace(/[Δ∆]/g," triangle ").toLowerCase().replace(/[’']/g,"").replace(/\|\|\||\/\/\//g," similar ").replace(/∥|\|\|/g," parallel ")
     .replace(/∠s|<s\b/g," angles ").replace(/[∠<]/g," angle ").replace(/△/g," triangle ").replace(/≡/g," congruent ").replace(/=/g," equal ");
   return x.split(/[^a-z0-9]+/).filter(Boolean).map(w=>{w=SYN[w]||w; if(w.length>3&&w.endsWith("s")&&!w.endsWith("ss"))w=w.slice(0,-1); return SYN[w]||w});
 }
