@@ -364,15 +364,66 @@ const IMG = {};
     s+=tx([340,30],"n = 6",{c:C.a,i:false,s:16});
     return svg(400,245,s)}
   IMG.hexSum=hex(true); IMG.hexOne=hex(false);
+
+  // ---- quadrilaterals ----
+  const X=(p1,p2,p3,p4)=>{const d=(p1[0]-p2[0])*(p3[1]-p4[1])-(p1[1]-p2[1])*(p3[0]-p4[0]),
+    t=((p1[0]-p3[0])*(p3[1]-p4[1])-(p1[1]-p3[1])*(p3[0]-p4[0]))/d; return [p1[0]+t*(p2[0]-p1[0]),p1[1]+t*(p2[1]-p1[1])]};
+  const poly=(P,col)=>`<path class="f" d="M${P.map(f).join("L")}Z" fill="${col}38" style="animation-delay:${nx(.05)}s"/>`;
+  const chev2=(a,b,col)=>chev(a,b,.7,col)+chev(a,b,.78,col);
+  function qd(P,names,cap){const g=cen(...P);let s="";for(let i=0;i<4;i++)s+=ln(P[i],P[(i+1)%4]);
+    s+=P.map((p,i)=>vlab(p,g,names[i])).join(""); if(cap)s+=tx([200,250],cap,{c:C.a,s:15,i:false}); return s}
+  const PAR=[[120,50],[350,50],[290,200],[60,200]], ABCD=["A","B","C","D"];
+  function parm(o){const [A,B,Cc,D]=PAR, O=X(A,Cc,B,D); let s="";
+    if(o.area) s+=poly([A,B,Cc],C.a)+poly([A,Cc,D],C.b);
+    s+=qd(PAR,ABCD,o.cap);
+    if(o.chev){const k=o.chev===true?INK:null; s+=chev(A,B,.74,k||C.a)+chev(D,Cc,.74,k||C.a)+chev2(A,D,k||C.b)+chev2(B,Cc,k||C.b)}
+    if(o.pair) s+=chev(A,B,.74,C.a)+chev(D,Cc,.74,C.a)+ticks(A,B,1,C.a)+ticks(D,Cc,1,C.a);
+    if(o.sides) s+=ticks(A,B,1,C.a)+ticks(D,Cc,1,C.a)+ticks(A,D,2,C.b)+ticks(B,Cc,2,C.b);
+    if(o.angs) s+=ang(A,B,D,{c:C.a})+ang(Cc,B,D,{c:C.a})+ang(B,A,Cc,{c:C.b,dbl:1})+ang(D,A,Cc,{c:C.b,dbl:1});
+    if(o.diag||o.area){s+=ln(A,Cc,{c:o.area?C.a:INK,w:1.8}); if(!o.area) s+=ln(B,D,{w:1.8})}
+    if(o.diag) s+=dot(O)+tx(pt(O,270,16),"O")+ticks(A,O,1,C.a)+ticks(O,Cc,1,C.a)+ticks(B,O,2,C.b)+ticks(O,D,2,C.b);
+    return svg(400,265,s)}
+  IMG.qSum=(()=>{const P=[[90,60],[320,40],[355,205],[55,190]];
+    return svg(400,265,qd(P,ABCD)+ang(P[0],P[1],P[3],{c:C.a})+ang(P[1],P[0],P[2],{c:C.b})+ang(P[2],P[1],P[3],{c:C.c})+ang(P[3],P[0],P[2],{c:C.d}))})();
+  IMG.qPar=parm({chev:"col",cap:"ABCD is a ∥m"});        IMG.qParC=parm({chev:"col",cap:"ABCD a ∥m ?"});
+  IMG.qSides=parm({chev:true,sides:1,cap:"ABCD is a ∥m"}); IMG.qSidesC=parm({sides:1,cap:"ABCD a ∥m ?"});
+  IMG.qAng=parm({chev:true,angs:1,cap:"ABCD is a ∥m"});   IMG.qAngC=parm({angs:1,cap:"ABCD a ∥m ?"});
+  IMG.qDiag=parm({chev:true,diag:1,cap:"ABCD is a ∥m"});  IMG.qDiagC=parm({diag:1,cap:"ABCD a ∥m ?"});
+  IMG.qArea=parm({chev:true,area:1,cap:"ABCD is a ∥m"});  IMG.qPairC=parm({pair:1,cap:"ABCD a ∥m ?"});
+  // rhombus
+  const RH=[[140,45],[290,45],[215,175],[65,175]];
+  IMG.rhDiag=(()=>{const [A,B,Cc,D]=RH,O=X(A,Cc,B,D);
+    return svg(400,265,qd(RH,ABCD,"ABCD is a rhombus")+ln(A,Cc,{w:1.8})+ln(B,D,{w:1.8})+sq(O,Cc,B,12)+dot(O)+
+      ticks(A,O,1,C.a)+ticks(O,Cc,1,C.a)+ticks(B,O,2,C.b)+ticks(O,D,2,C.b))})();
+  IMG.rhAng=(()=>{const [A,B,Cc,D]=RH; const a=dir(A,B),m=dir(A,Cc),d=dir(A,D);
+    return svg(400,265,qd(RH,ABCD,"ABCD is a rhombus")+ln(A,Cc,{w:1.8})+arc(A,m,a,{c:C.a,t:"1",r:30,lr:44})+arc(A,d,m,{c:C.b,t:"2",r:30,lr:44}))})();
+  IMG.rhSides=(()=>{const [A,B,Cc,D]=RH;
+    return svg(400,265,qd(RH,ABCD,"ABCD is a rhombus")+ticks(A,B,1,C.a)+ticks(B,Cc,1,C.a)+ticks(Cc,D,1,C.a)+ticks(D,A,1,C.a))})();
+  IMG.sqSides=(()=>{const P=[[125,40],[275,40],[275,190],[125,190]],[A,B,Cc,D]=P;
+    return svg(400,265,qd(P,["P","Q","R","S"],"PQRS is a square")+sq(A,B,D)+sq(B,Cc,A)+sq(Cc,D,B)+sq(D,A,Cc)+
+      ticks(A,B,1,C.b)+ticks(B,Cc,1,C.b)+ticks(Cc,D,1,C.b)+ticks(D,A,1,C.b))})();
+  IMG.rectDiag=(()=>{const P=[[70,45],[330,45],[330,200],[70,200]],[A,B,Cc,D]=P;
+    return svg(400,265,qd(P,ABCD,"ABCD is a rectangle")+sq(A,B,D)+sq(B,Cc,A)+sq(Cc,D,B)+sq(D,A,Cc)+
+      ln(A,Cc,{c:C.a,w:2.4})+ln(B,D,{c:C.a,w:2.4}))})();
+  // kite: AB = AD (short), CB = CD (long); AC is the long diagonal
+  const KT=[[200,28],[285,88],[200,215],[115,88]];
+  function kite(o){const [A,B,Cc,D]=KT,O=X(A,Cc,B,D);
+    let s=qd(KT,ABCD,"ABCD is a kite")+ticks(A,B,1,DIM)+ticks(A,D,1,DIM)+ticks(Cc,B,2,DIM)+ticks(Cc,D,2,DIM)+ln(A,Cc,{w:1.8});
+    if(o.perp) s+=ln(B,D,{w:1.8})+dot(O)+sq(O,Cc,B,12,C.a);
+    if(o.bis) s+=ln(B,O,{c:C.a,w:2.6})+ln(O,D,{c:C.a,w:2.6})+dot(O)+ticks(B,O,1,C.a)+ticks(O,D,1,C.a)+tx(pt(O,290,16),"O");
+    if(o.ang){const b=dir(Cc,B),m=dir(Cc,A),d=dir(Cc,D); s+=arc(Cc,b,m,{c:C.a,t:"1",r:34,lr:48})+arc(Cc,m,d,{c:C.b,t:"2",r:34,lr:48})}
+    return svg(400,265,s)}
+  IMG.kPerp=kite({perp:1}); IMG.kBis=kite({bis:1}); IMG.kAng=kite({ang:1});
 })();
 
 /* ===== CONFIG ===== */
 const CONFIG = {
   title: "Euclidean <span>Geometry</span>",
-  subtitle: "Grade 10 Maths · give the reason · name the triangle",
+  subtitle: "Grade 10 Maths · give the reason · name the triangle · quads",
   prompt: "Why is this true? Give the reason.",
 };
 const PAR=b=>[b+"; AB∥CD", b+"; AB ∥ CD", b+", AB∥CD", b+" AB∥CD", b+" AB ∥ CD"];
+const PM="ABCD is a parallelogram. Why is this true?", PMC="Nothing says it is a parallelogram. Why is ABCD a ∥m?", KT="ABCD is a kite. Why is this true?";
 const WHY="Why is this true? Give the reason.", NAME="Type its name.", COND="Which congruency condition proves △ABC ≡ △DEF?";
 const CARDS = [
   // Straight lines
@@ -434,6 +485,27 @@ const CARDS = [
     a:["180°(n − 2)","180(n-2)","180(n - 2)","180 (n-2)","180 (n - 2)","180°(n-2)","180 x (n-2)","180 × (n − 2)","(n-2)180","(n-2) x 180","(n - 2) × 180°"]},
   {t:"One interior angle of a regular polygon", g:"Similarity & Polygons", img:"hexOne", p:"Give the formula (n = number of sides).",
     a:["180°(n − 2) ÷ n","180(n-2)/n","180(n - 2)/n","180(n-2) / n","180(n - 2) / n","180 (n-2)/n","180°(n-2)/n","(180(n-2))/n","(n-2)180/n","180(n-2) ÷ n","180 x (n-2) / n"]},
+  // Quadrilaterals (reasons from the DBE "Acceptable reasons: Euclidean geometry" list)
+  {t:"Â + B̂ + Ĉ + D̂ = 360°", g:"Quadrilaterals", img:"qSum", p:WHY,
+    a:["sum of ∠s in quad","sum of angles in quad","sum of ∠s in a quad","int ∠s of quad"]},
+  {t:"AB ∥ DC and AD ∥ BC", g:"Quadrilaterals", img:"qPar", p:PM, a:["opp sides of ||m","opposite sides of a parallelogram"]},
+  {t:"AB = DC and AD = BC", g:"Quadrilaterals", img:"qSides", p:PM, a:["opp sides of ||m","opposite sides of a parallelogram"]},
+  {t:"Â = Ĉ and B̂ = D̂", g:"Quadrilaterals", img:"qAng", p:PM, a:["opp ∠s of ||m","opposite angles of a parallelogram"]},
+  {t:"AO = OC and BO = OD", g:"Quadrilaterals", img:"qDiag", p:PM, a:["diag of ||m","diags of ||m","diagonals of a parallelogram"]},
+  {t:"Area △ABC = area △ACD", g:"Quadrilaterals", img:"qArea", p:PM, a:["diag bisect area of ||m","diag bisects area of ||m","diagonal bisects area of parallelogram"]},
+  {t:"AB ∥ DC and AD ∥ BC, so ABCD is a ∥m", g:"Quadrilaterals", img:"qParC", p:PMC, a:["opp sides of quad are ||","opposite sides of quad are parallel"]},
+  {t:"AB = DC and AD = BC, so ABCD is a ∥m", g:"Quadrilaterals", img:"qSidesC", p:PMC, a:["opp sides of quad are =","converse opp sides of a parm","opposite sides of quad are equal"]},
+  {t:"Â = Ĉ and B̂ = D̂, so ABCD is a ∥m", g:"Quadrilaterals", img:"qAngC", p:PMC, a:["opp ∠s of quad are =","converse opp angles of a parm","opposite angles of quad are equal"]},
+  {t:"AO = OC and BO = OD, so ABCD is a ∥m", g:"Quadrilaterals", img:"qDiagC", p:PMC, a:["diags of quad bisect each other","converse diags of a parm","diagonals of quad bisect each other"]},
+  {t:"AB = DC and AB ∥ DC, so ABCD is a ∥m", g:"Quadrilaterals", img:"qPairC", p:PMC, a:["pair of opp sides = and ||","one pair of opp sides = and ||","pair of opposite sides equal and parallel"]},
+  {t:"AO = OC, BO = OD and AC ⊥ BD", g:"Quadrilaterals", img:"rhDiag", p:"ABCD is a rhombus. Why is this true?", a:["diags of rhombus","diagonals of rhombus"]},
+  {t:"Â₁ = Â₂", g:"Quadrilaterals", img:"rhAng", p:"ABCD is a rhombus. Why is this true?", a:["diags of rhombus","diagonals of rhombus"]},
+  {t:"AB = BC = CD = DA", g:"Quadrilaterals", img:"rhSides", p:"ABCD is a rhombus. Why is this true?", a:["sides of rhombus"]},
+  {t:"PQ = QR = RS = SP", g:"Quadrilaterals", img:"sqSides", p:"PQRS is a square. Why is this true?", a:["sides of square","sides of a square"]},
+  {t:"AC = BD", g:"Quadrilaterals", img:"rectDiag", p:"ABCD is a rectangle. Why is this true?", a:["diags of rect","diagonals of rectangle"]},
+  {t:"AC ⊥ BD", g:"Quadrilaterals", img:"kPerp", p:KT, a:["diags of kite","diagonals of kite"]},
+  {t:"BO = OD", g:"Quadrilaterals", img:"kBis", p:KT, a:["diag of kite","diagonal of kite"]},
+  {t:"Ĉ₁ = Ĉ₂", g:"Quadrilaterals", img:"kAng", p:KT, a:["diag of kite","diagonal of kite"]},
 ];
 const THEME = {
   fonts:{url:"https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap",
@@ -454,13 +526,13 @@ document.body.style.backgroundSize="28px 28px,28px 28px,auto,auto";
     document.querySelector('link[href*="fonts.googleapis.com/css2"]').href=THEME.fonts.url; }
 })();
 
-const SOFT = new Set(["a","an","the"]);
+const SOFT = new Set(["a","an","the","are","is","of"]);
 // maths-aware matching: symbols become words (∠/< angle, △ triangle, ∥/|| parallel, = equal), short forms expand,
 // plurals fold, and a one-letter typo in a word of 4+ letters still counts
 const SYN={ext:"exterior",int:"interior",opp:"opposite",corresp:"corresponding",corr:"corresponding",alt:"alternate",adj:"adjacent",
-  supp:"supplementary",suppl:"supplementary",vert:"vertical",vertically:"vertical",str:"straight",equals:"equal",eq:"equal",around:"round",tri:"triangle"};
+  supp:"supplementary",suppl:"supplementary",vert:"vertical",vertically:"vertical",str:"straight",equals:"equal",eq:"equal",around:"round",tri:"triangle",quad:"quadrilateral",rect:"rectangle",diagonal:"diag","1":"one"};
 function subs(raw){
-  const x=raw.replace(/\b[Tt]ri(?=[A-Z])/g," triangle ").replace(/[Δ∆]/g," triangle ").toLowerCase().replace(/[’']/g,"").replace(/\|\|\||\/\/\//g," similar ").replace(/∥|\|\|/g," parallel ")
+  const x=raw.replace(/\b[Tt]ri(?=[A-Z])/g," triangle ").replace(/[Δ∆]/g," triangle ").toLowerCase().replace(/[’']/g,"").replace(/\|\|m\b|∥m\b|\bparm\b/g," parallelogram ").replace(/⊥/g," perpendicular ").replace(/\|\|\||\/\/\//g," similar ").replace(/∥|\|\|/g," parallel ")
     .replace(/∠s|<s\b/g," angles ").replace(/[∠<]/g," angle ").replace(/△/g," triangle ").replace(/≡/g," congruent ").replace(/=/g," equal ");
   return x.split(/[^a-z0-9]+/).filter(Boolean).map(w=>{w=SYN[w]||w; if(w.length>3&&w.endsWith("s")&&!w.endsWith("ss"))w=w.slice(0,-1); return SYN[w]||w});
 }
