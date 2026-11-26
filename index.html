@@ -414,6 +414,32 @@ const IMG = {};
     if(o.ang){const b=dir(Cc,B),m=dir(Cc,A),d=dir(Cc,D); s+=arc(Cc,b,m,{c:C.a,t:"1",r:34,lr:48})+arc(Cc,m,d,{c:C.b,t:"2",r:34,lr:48})}
     return svg(400,265,s)}
   IMG.kPerp=kite({perp:1}); IMG.kBis=kite({bis:1}); IMG.kAng=kite({ang:1});
+
+  // ---- extra reasons: str-line converse, midpoint theorem, congruency proof reasons, AAA, Pythagoras ----
+  IMG.adjC=(()=>{const B=[200,170],A=[30,170],Cc=[370,170],D=pt(B,55,150);
+    return svg(400,232,ln(A,B)+ln(B,Cc)+ln(B,D)+arc(B,55,180,{c:C.a,t:"1",r:26})+arc(B,0,55,{c:C.b,t:"2",r:26})+
+      tx([22,170],"A")+tx([380,170],"C")+tx(pt(D,55,14),"D")+tx([200,192],"B")+tx([310,215],"ABC straight ?",{c:C.a,s:15,i:false}))})();
+  function midT(conv){const A=[200,28],B=[55,212],Cc=[345,212],D=mid(A,B),E=mid(A,Cc);
+    let s=tri([A,B,Cc],["A","B","C"])+ln(D,E,{c:conv?INK:C.a,w:2.6})+tx(pt(D,180,16),"D")+tx(pt(E,0,16),"E")+
+      ticks(A,D,1,DIM)+ticks(D,B,1,DIM)+chev(D,E,.6,conv?INK:C.a)+chev(B,Cc,.56,conv?INK:C.a);
+    s+= conv ? ticks(A,E,2,C.a)+ticks(E,Cc,2,C.a) : ticks(A,E,2,DIM)+ticks(E,Cc,2,DIM);
+    return svg(400,240,s)}
+  IMG.midT=midT(false); IMG.midC=midT(true);
+  const KA=[200,28],KB=[318,118],KC=[200,208],KD=[82,118];
+  function pair(o){let s=ln(KA,KB)+ln(KB,KC)+ln(KC,KD)+ln(KD,KA)+ln(KA,KC,o.common?{c:C.a,w:3}:{w:1.8})+
+      tx(pt(KA,90,16),"A")+tx(pt(KB,0,16),"B")+tx(pt(KC,270,16),"C")+tx(pt(KD,180,16),"D");
+    s+=ticks(KA,KB,1,o.given?C.a:DIM)+ticks(KA,KD,1,o.given?C.a:DIM)+ticks(KC,KB,2,DIM)+ticks(KC,KD,2,DIM);
+    if(o.ang) s+=ang(KB,KA,KC,{c:C.a})+ang(KD,KA,KC,{c:C.a});
+    if(o.cap) s+=tx([330,225],o.cap,{c:C.a,s:15,i:false});
+    return svg(400,240,s)}
+  IMG.common=pair({common:1}); IMG.congP=pair({ang:1,cap:"△ABC ≡ △ADC"}); IMG.givenP=pair({given:1});
+  IMG.simA=(()=>{const B=[28,205],Cc=[200,205],A=triAB(B,Cc,58,68),E=[262,205],F=[376,205],D=triAB(E,F,58,68);
+    return svg(400,235,tri([A,B,Cc],["A","B","C"])+tri([D,E,F],["D","E","F"])+
+      ang(A,B,Cc,{c:C.a,r:18})+ang(D,E,F,{c:C.a,r:18})+ang(Cc,A,B,{c:C.b,r:16,dbl:1})+ang(F,D,E,{c:C.b,r:16,dbl:1})+
+      ang(B,A,Cc,{c:C.c,r:16})+ang(E,D,F,{c:C.c,r:16}))})();
+  IMG.pyth=(()=>{const B=[95,200],A=[95,45],Cc=[330,200];
+    return svg(400,235,ln(A,B)+ln(B,Cc)+ln(A,Cc,{c:C.a,w:3})+sq(B,A,Cc)+tx(pt(A,90,15),"A")+tx(pt(B,225,16),"B")+tx(pt(Cc,0,15),"C")+
+      tx(pt(mid(A,Cc),57,34),"hypotenuse",{c:C.a,s:14,i:false}))})();
 })();
 
 /* ===== CONFIG ===== */
@@ -506,6 +532,22 @@ const CARDS = [
   {t:"AC ⊥ BD", g:"Quadrilaterals", img:"kPerp", p:KT, a:["diags of kite","diagonals of kite"]},
   {t:"BO = OD", g:"Quadrilaterals", img:"kBis", p:KT, a:["diag of kite","diagonal of kite"]},
   {t:"Ĉ₁ = Ĉ₂", g:"Quadrilaterals", img:"kAng", p:KT, a:["diag of kite","diagonal of kite"]},
+  // More proof reasons (wording from the DBE "Acceptable reasons" list)
+  {t:"B̂₁ + B̂₂ = 180°, so ABC is a straight line", g:"Straight Lines", img:"adjC", p:"Why is ABC a straight line?",
+    a:["adj ∠s supp","adj angles supp","adjacent angles supplementary"]},
+  {t:"DE ∥ BC and DE = ½BC", g:"Triangle Properties", img:"midT", p:"D and E are the midpoints of AB and AC. Why is this true?",
+    a:["midpt theorem","midpoint theorem","midpt thm"]},
+  {t:"AE = EC", g:"Triangle Properties", img:"midC", p:"D is the midpoint of AB and DE ∥ BC. Why is this true?",
+    a:["line through midpt || to 2nd side","line through midpoint parallel to second side","line through midpt ∥ to 2nd side"]},
+  {t:"AC² = AB² + BC²", g:"Triangle Properties", img:"pyth", p:"B̂ = 90° in △ABC. Why is this true?",
+    a:["Pythagoras","Theorem of Pythagoras","Pythag"]},
+  {t:"AC = AC", g:"Congruency", img:"common", p:"Proving △ABC ≡ △ADC. Give the reason for this line.", a:["common","common side"]},
+  {t:"AB = AD (told in the question)", g:"Congruency", img:"givenP", p:"The question tells you this. What reason do you write?", a:["given"]},
+  {t:"AB = AD (shown earlier in your proof)", g:"Congruency", img:"givenP", p:"You worked this out in an earlier step. What reason do you write?", a:["proved","proven"]},
+  {t:"B̂ = D̂", g:"Congruency", img:"congP", p:"△ABC ≡ △ADC is already proved. Why is this true?",
+    a:["≡ △s","≡△s","congruent △s","congruent triangles"]},
+  {t:"△ABC ||| △DEF", g:"Similarity & Polygons", img:"simA", p:"All three pairs of angles are equal. Why are the triangles similar?",
+    a:["equiangular △s","equiangular triangles","∠∠∠","AAA"]},
 ];
 const THEME = {
   fonts:{url:"https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap",
@@ -526,14 +568,14 @@ document.body.style.backgroundSize="28px 28px,28px 28px,auto,auto";
     document.querySelector('link[href*="fonts.googleapis.com/css2"]').href=THEME.fonts.url; }
 })();
 
-const SOFT = new Set(["a","an","the","are","is","of"]);
+const SOFT = new Set(["a","an","the","are","is","of","to"]);
 // maths-aware matching: symbols become words (∠/< angle, △ triangle, ∥/|| parallel, = equal), short forms expand,
 // plurals fold, and a one-letter typo in a word of 4+ letters still counts
 const SYN={ext:"exterior",int:"interior",opp:"opposite",corresp:"corresponding",corr:"corresponding",alt:"alternate",adj:"adjacent",
-  supp:"supplementary",suppl:"supplementary",vert:"vertical",vertically:"vertical",str:"straight",equals:"equal",eq:"equal",around:"round",tri:"triangle",quad:"quadrilateral",rect:"rectangle",diagonal:"diag","1":"one"};
+  supp:"supplementary",suppl:"supplementary",vert:"vertical",vertically:"vertical",str:"straight",equals:"equal",eq:"equal",around:"round",tri:"triangle",quad:"quadrilateral",rect:"rectangle",diagonal:"diag","1":"one",midpoint:"midpt",second:"2nd",thm:"theorem",pythag:"pythagoras",pyth:"pythagoras",proven:"proved",cong:"congruent",aaa:"angle",thru:"through"};
 function subs(raw){
   const x=raw.replace(/\b[Tt]ri(?=[A-Z])/g," triangle ").replace(/[Δ∆]/g," triangle ").toLowerCase().replace(/[’']/g,"").replace(/\|\|m\b|∥m\b|\bparm\b/g," parallelogram ").replace(/⊥/g," perpendicular ").replace(/\|\|\||\/\/\//g," similar ").replace(/∥|\|\|/g," parallel ")
-    .replace(/∠s|<s\b/g," angles ").replace(/[∠<]/g," angle ").replace(/△/g," triangle ").replace(/≡/g," congruent ").replace(/=/g," equal ");
+    .replace(/∠s|<s\b/g," angles ").replace(/[∠<]/g," angle ").replace(/△s\b/g," triangles ").replace(/△/g," triangle ").replace(/≡/g," congruent ").replace(/=/g," equal ");
   return x.split(/[^a-z0-9]+/).filter(Boolean).map(w=>{w=SYN[w]||w; if(w.length>3&&w.endsWith("s")&&!w.endsWith("ss"))w=w.slice(0,-1); return SYN[w]||w});
 }
 function lev1(a,b){ if(Math.abs(a.length-b.length)>1)return false; let i=0,j=0,e=0;
